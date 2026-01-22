@@ -1,0 +1,91 @@
+// ===============================
+// STORAGE SEGURO (PREVENTIVO)
+// ===============================
+const APP_STORAGE_KEY = "jogoVelhaPWA_v2";
+
+function safeGetJSON(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    // Preventivo: modo anônimo / storage bloqueado / JSON quebrado
+    return null;
+  }
+}
+
+function safeSetJSON(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (e) {
+    // Preventivo: storage cheio/bloqueado
+    return false;
+  }
+}
+
+// estado padrão
+function getDefaultState() {
+  return {
+    theme: "dark",      // ou "light"
+    mode: "bot",        // "bot" ou "2p"
+    difficulty: "medio",// "facil" | "medio" | "impossivel"
+    sound: true,
+    score: { x: 0, o: 0, draw: 0 }
+  };
+}
+
+function loadAppState() {
+  return safeGetJSON(APP_STORAGE_KEY) || getDefaultState();
+}
+
+function saveAppState(state) {
+  safeSetJSON(APP_STORAGE_KEY, state);
+}
+
+{
+  "name": "Jogo da Velha",
+  "short_name": "Velha",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+// registra SW
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./service-worker.js");
+}
+
+// botão instalar (PWA)
+let deferredPrompt = null;
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  const btn = document.getElementById("btnInstall");
+  if (btn) btn.style.display = "inline-block";
+});
+
+async function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+
+  const btn = document.getElementById("btnInstall");
+  if (btn) btn.style.display = "none";
+}
+
