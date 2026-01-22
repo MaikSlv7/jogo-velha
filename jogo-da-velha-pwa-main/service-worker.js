@@ -1,4 +1,4 @@
-const CACHE_NAME = "jogo-velha-pwa-v2";
+const CACHE_NAME = "jogo-velha-pwa-v1769122719";
 const ASSETS = [
   "./",
   "./index.html",
